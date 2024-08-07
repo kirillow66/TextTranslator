@@ -4,9 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import ru.tbank.edu.model.TranslationRequest;
+import ru.tbank.edu.repository.TranslationRepository;
 
 import java.net.InetAddress;
 import java.util.concurrent.CompletableFuture;
@@ -19,7 +20,7 @@ public class TranslationService {
     private static final String TRANSLATE_API_URL = "https://translate.api.cloud.yandex.net/translate/v2/translate";
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private TranslationRepository translationRepository;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ExecutorService executorService = Executors.newFixedThreadPool(10);
@@ -48,8 +49,7 @@ public class TranslationService {
         headers.set("Authorization", IAM_TOKEN);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String requestBody = String.format("{\"sourceLanguageCode\":\"%s\",\"targetLanguageCode\":\"%s\",\"texts\":[\"%s\"]}", sourceLang, targetLang, word);
-        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+        String requestBody = String.format("{\"sourceLanguageCode\":\"%s\",\"targetLanguageCode\":\"%s\",\"texts\":[\"%s\"]}", sourceLang, targetLang, word);HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> response = restTemplate.exchange(TRANSLATE_API_URL, HttpMethod.POST, entity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
@@ -67,8 +67,11 @@ public class TranslationService {
     }
 
     private void saveTranslationRequest(String ipAddress, String inputText, String translatedText) {
-        String sql = "INSERT INTO translation_requests (ip_address, input_text, translated_text) VALUES (?, ?, ?)";
-        jdbcTemplate.update(sql, ipAddress, inputText, translatedText);
+        TranslationRequest request = new TranslationRequest();
+        request.setIpAddress(ipAddress);
+        request.setInputText(inputText);
+        request.setTranslatedText(translatedText);
+        translationRepository.save(request);
     }
 
     private String getUserIpAddress() {
