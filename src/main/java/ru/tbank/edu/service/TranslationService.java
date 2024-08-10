@@ -16,8 +16,9 @@ import java.util.concurrent.Executors;
 
 @Service
 public class TranslationService {
-    private static final String IAM_TOKEN = "Bearer y0_AgAAAAAaLkXVAATuwQAAAAEMjjALAADYzyiwXDBLwLVVhvd_0U6Xgxavtg";
+    private static final String IAM_TOKEN = "Bearer t1.9euelZqez5LJmJWayp6Xl42dnpXLkO3rnpWaiZfMm5eZzI3OiYrMlMeJx5bl8_dUfyFK-e84f1oK_d3z9xQuH0r57zh_Wgr9zef1656VmpWVmYudipzPmInIlcedkYvJ7_zF656VmpWVmYudipzPmInIlcedkYvJ.l74KFRCcQuH3tdzAGup5sC2XToHl6nDdr7-g2vV8PJ2UrcyLUhHga2okR3gBaBWUn3jq-rFhkZjJIKT0RAUwBg";
     private static final String TRANSLATE_API_URL = "https://translate.api.cloud.yandex.net/translate/v2/translate";
+    private static final String folderId = "b1grruricbmgsg19q2vm";
 
     @Autowired
     private TranslationRepository translationRepository;
@@ -49,7 +50,7 @@ public class TranslationService {
         headers.set("Authorization", IAM_TOKEN);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String requestBody = String.format("{\"sourceLanguageCode\":\"%s\",\"targetLanguageCode\":\"%s\",\"texts\":[\"%s\"]}", sourceLang, targetLang, word);HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+        String requestBody = String.format("{\"folderId\":\"%s\",\"sourceLanguageCode\":\"%s\",\"targetLanguageCode\":\"%s\",\"texts\":[\"%s\"]}", folderId, sourceLang, targetLang, word);HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> response = restTemplate.exchange(TRANSLATE_API_URL, HttpMethod.POST, entity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
